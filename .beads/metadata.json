@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "tvmcp",
+  "project_id": "5581f01e-a47b-42a6-864e-cc48f396e6eb"
+}

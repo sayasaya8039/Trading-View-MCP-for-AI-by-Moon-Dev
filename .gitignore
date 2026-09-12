@@ -20,3 +20,8 @@ dist/
 # scratch screenshots written by mount_pine.py / tv_screenshot
 moon_dev_chart.png
 _debug_state.png
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
