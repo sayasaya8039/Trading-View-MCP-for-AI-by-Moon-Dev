@@ -16,10 +16,21 @@ dist/
 
 # tool call logs
 *.jsonl
+!.beads/issues.jsonl
 
 # scratch screenshots written by mount_pine.py / tv_screenshot
 moon_dev_chart.png
 _debug_state.png
+
+# Local installation and verification artifacts
+.venv/
+.codex/
+repomix-review.xml
+.coverage
+coverage.xml
+*.local.ps1
+*.local.toml
+.pytest_tmp/
 
 # Beads / Dolt files (added by bd init)
 .dolt/
