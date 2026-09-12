@@ -18,26 +18,34 @@ from ._helpers import focus_chart, press_escape, with_cdp
 
 
 def _current_chart_state(cdp: CDPClient) -> dict[str, str]:
-    """Scrape symbol + interval from the page title and URL. TV encodes both."""
+    """Read the active chart API, falling back while the chart initializes."""
     js = """
     (() => {
       const title = document.title || '';
       const href = location.href || '';
-      return { title: title, href: href };
+      const state = { title, href, symbol: '', interval: '' };
+      // Modern titles contain a price instead of an interval, and saved chart
+      // URLs need not include either field. Read the live chart's getters.
+      let chart;
+      try { chart = window.TradingViewApi?.activeChart?.(); } catch (_) {}
+      try { state.symbol = chart?.symbol?.() || ''; } catch (_) {}
+      try { state.interval = chart?.resolution?.() || ''; } catch (_) {}
+      return state;
     })()
     """
     data = cdp.eval_js(js) or {}
     title = str(data.get("title", ""))
     href = str(data.get("href", ""))
-    symbol, interval = "", ""
+    symbol = str(data.get("symbol") or "")
+    interval = str(data.get("interval") or "")
     # "NVDA, 5 — TradingView" or "BTCUSD · 1H Chart" — many variants. Best-effort.
     if " — " in title:
         head = title.split(" — ", 1)[0]
         parts = [p.strip() for p in head.replace("·", ",").split(",")]
         if parts:
-            symbol = parts[0]
+            symbol = symbol or parts[0]
             if len(parts) >= 2:
-                interval = parts[1]
+                interval = interval or parts[1]
     # Fallback: parse ?symbol=&interval= from URL.
     from urllib.parse import urlparse, parse_qs
     qs = parse_qs(urlparse(href).query)

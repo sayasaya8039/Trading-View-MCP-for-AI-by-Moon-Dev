@@ -16,6 +16,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import sys
 import threading
 import time
 from dataclasses import dataclass
@@ -263,7 +264,7 @@ def moondev_control_url() -> str | None:
         try:
             r = requests.get(f"{base}/mcp/health", timeout=1.5)
             if r.ok and r.json().get("app") == "Moon Dev Code App":
-                print(f"🌙 Moon Dev: driving the Code App browser via {base}")
+                print(f"🌙 Moon Dev: driving the Code App browser via {base}", file=sys.stderr)
                 _moondev_ctrl_cache = base
                 return base
         except Exception:

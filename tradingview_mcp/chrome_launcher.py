@@ -57,6 +57,9 @@ def find_chrome_binary() -> str:
             r"C:\Program Files\Google\Chrome\Application\chrome.exe",
             r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
         ]
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if local_app_data:
+            candidates.append(str(Path(local_app_data) / "Google/Chrome/Application/chrome.exe"))
 
     for c in candidates:
         if c and Path(c).exists():
@@ -110,7 +113,7 @@ def launch_chrome(wait_ready: bool = True, wait_seconds: float = 15.0) -> subpro
         # same as real Chrome. We just trust the CDP endpoint regardless — if it's the Moon
         # Dev Code App, the user has the Browser overlay open to tradingview.com; if it's
         # a standalone Chrome, they launched it manually. Either way we reuse it.
-        print(f"🌙 Moon Dev: CDP endpoint live on port {CDP_PORT} ({browser or 'unknown'}) — reusing.")
+        print(f"🌙 Moon Dev: CDP endpoint live on port {CDP_PORT} ({browser or 'unknown'}) — reusing.", file=sys.stderr)
         return None
 
     if TV_MCP_SKIP_LAUNCH:
@@ -146,7 +149,7 @@ def launch_chrome(wait_ready: bool = True, wait_seconds: float = 15.0) -> subpro
         START_URL,
     ]
 
-    print(f"🌙 Moon Dev: launching dedicated Chrome → profile at {PROFILE_DIR}")
+    print(f"🌙 Moon Dev: launching dedicated Chrome → profile at {PROFILE_DIR}", file=sys.stderr)
     proc = subprocess.Popen(
         args,
         stdout=subprocess.DEVNULL,
@@ -158,7 +161,7 @@ def launch_chrome(wait_ready: bool = True, wait_seconds: float = 15.0) -> subpro
         deadline = time.time() + wait_seconds
         while time.time() < deadline:
             if cdp_is_ready():
-                print(f"🌙 Moon Dev: Chrome CDP ready on port {CDP_PORT}")
+                print(f"🌙 Moon Dev: Chrome CDP ready on port {CDP_PORT}", file=sys.stderr)
                 return proc
             time.sleep(0.3)
         raise RuntimeError(
@@ -174,7 +177,8 @@ def main() -> int:
         "Log into TradingView if you haven't already — the login persists.\n"
         f"   CDP endpoint: http://127.0.0.1:{CDP_PORT}\n"
         f"   Profile dir:  {PROFILE_DIR}\n"
-        "Leave the window open. The MCP server will connect on demand."
+        "Leave the window open. The MCP server will connect on demand.",
+        file=sys.stderr,
     )
     return 0
 
